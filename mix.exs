@@ -6,6 +6,7 @@ defmodule Clik.MixProject do
       app: :clik,
       version: "0.1.0",
       elixir: "~> 1.14",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: [],
       test_coverage: test_coverage(),
@@ -30,4 +31,7 @@ defmodule Clik.MixProject do
   defp aliases() do
     [cover: "test --cover"]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end

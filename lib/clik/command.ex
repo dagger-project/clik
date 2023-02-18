@@ -5,19 +5,18 @@ end
 
 defmodule Clik.Command do
   alias Clik.CommandInvocation
-  alias Clik.{Option, Options}
+  alias Clik.{Option, Options, Output}
   alias Clik.Output.Document
   alias Clik.Renderable
 
   @type t :: %__MODULE__{}
+  @type registry :: %{atom() => t()}
 
   defstruct [:script_name, :name, :cb_mod]
 
   @callback options() :: Option.options()
   @callback help_text() :: String.t()
   @callback handle(CommandInvocation.t()) :: :ok | :error | :help
-
-  @show_help [:error, :help]
 
   defmacro __using__(_) do
     quote do
@@ -28,36 +27,54 @@ defmodule Clik.Command do
 
       def options(), do: []
 
+      @spec new(atom()) :: Click.Command.t()
+      def new(name) do
+        %Clik.Command{name: name, cb_mod: __MODULE__}
+      end
+
       defoverridable(options: 0)
     end
   end
 
-  @spec new(atom(), atom()) :: t()
-  def new(name, callback),
-    do: %__MODULE__{name: name, cb_mod: callback}
+  @spec register(t(), registry()) :: {:ok, registry()} | :error
+  def register(cmd, commands) do
+    register(cmd, cmd.name, commands)
+  end
 
-  @spec run(t(), [String.t()]) :: :ok | no_return()
-  def run(cmd, argv) do
+  @spec register(t(), atom(), registry()) :: {:ok, registry()} | :error
+  def register(cmd, name, commands) do
+    if Map.has_key?(commands, name) do
+      :error
+    else
+      {:ok, Map.put(commands, name, cmd)}
+    end
+  end
+
+  @spec run(t(), String.t(), [String.t()], IO.device(), IO.device()) :: :ok | no_return()
+  def run(cmd, script_name, argv, output, err_output) do
     case Options.parse(argv, cmd.cb_mod.options()) do
       {:ok, {parsed, args}} ->
-        if cmd.cb_mod.handle(%CommandInvocation{options: parsed, arguments: args}) in @show_help do
-          show_help(cmd)
+        case cmd.cb_mod.handle(%CommandInvocation{options: parsed, arguments: args}) do
+          :help ->
+            show_help(cmd, script_name, output)
+
+          result ->
+            result
         end
 
       {:error, {:missing_option, name}} ->
         d = Document.empty() |> Document.line("Required option --#{name} is missing")
-        IO.puts(:stderr, Renderable.render(d))
+        Output.puts(err_output, Renderable.render(d))
     end
   end
 
-  defp show_help(cmd) do
+  defp show_help(cmd, script_name, device) do
     d =
       Document.empty()
-      |> Document.text("Usage: ")
-      |> Document.text(Atom.to_string(cmd.name))
+      |> Document.text("Usage: #{script_name}")
       |> Document.break()
       |> Document.text(cmd.cb_mod.help_text())
 
-    IO.puts(Renderable.render(d))
+    Output.puts(device, Renderable.render(d))
   end
 end
