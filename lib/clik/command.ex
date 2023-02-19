@@ -1,10 +1,5 @@
-defmodule Clik.CommandInvocation do
-  @type t :: %__MODULE__{}
-  defstruct [:options, :arguments]
-end
-
 defmodule Clik.Command do
-  alias Clik.CommandInvocation
+  alias Clik.Command.Invocation
   alias Clik.{Option, Options, Output}
   alias Clik.Output.Document
   alias Clik.Renderable
@@ -24,6 +19,7 @@ defmodule Clik.Command do
       alias Clik.Option
       alias Clik.Output.Document
       alias Clik.Renderable
+      alias Clik.Command.Invocation, as: CommandInvocation
 
       def options(), do: []
 
@@ -54,7 +50,12 @@ defmodule Clik.Command do
   def run(cmd, script_name, argv, output, err_output) do
     case Options.parse(argv, cmd.cb_mod.options()) do
       {:ok, {parsed, args}} ->
-        case cmd.cb_mod.handle(%CommandInvocation{options: parsed, arguments: args}) do
+        case cmd.cb_mod.handle(%Invocation{
+               options: parsed,
+               arguments: args,
+               output: output,
+               err_output: err_output
+             }) do
           :help ->
             show_help(cmd, script_name, output)
 

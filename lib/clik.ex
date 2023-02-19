@@ -27,18 +27,26 @@ defmodule Clik do
     end
   end
 
-  defp find_command([arg | rest], commands) do
+  defp find_command([arg | rest] = args, commands) do
     try do
       name = String.to_existing_atom(arg)
 
       if Map.has_key?(commands, name) do
         {:ok, {rest, Map.fetch!(commands, name)}}
       else
-        {:error, :unknown_command}
+        if Map.has_key?(commands, :default) do
+          {:ok, {args, Map.fetch!(commands, :default)}}
+        else
+          {:error, :unknown_command}
+        end
       end
     rescue
       ArgumentError ->
-        {:error, :unknown_command}
+        if Map.has_key?(commands, :default) do
+          {:ok, {args, Map.fetch!(commands, :default)}}
+        else
+          {:error, :unknown_command}
+        end
     end
   end
 end

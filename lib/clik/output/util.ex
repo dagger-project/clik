@@ -5,10 +5,6 @@ defmodule Clik.Output.Util do
   @unix_cmd "tput"
   @default_width 80
 
-  def script_name() do
-    
-  end
-
   def term_width() do
     {os_type, _} = :os.type()
     term_width(os_type)

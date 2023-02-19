@@ -7,6 +7,8 @@ defmodule Clik.Output do
     :file.write(fd, data)
   end
 
+  def puts(:stdout, data), do: IO.puts(data)
+
   def puts(device, data) do
     IO.puts(device, data)
   end

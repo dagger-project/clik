@@ -3,5 +3,11 @@ defmodule Clik.DoNothingCommand do
 
   def help_text(), do: "Test command"
 
-  def handle(_invocation), do: :ok
+  def handle(invocation) do
+    doc =
+      Document.empty()
+      |> Document.line("ok")
+
+    CommandInvocation.puts(invocation, :out, doc)
+  end
 end
