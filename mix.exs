@@ -41,6 +41,6 @@ defmodule Clik.MixProject do
   defp elixirc_paths(_), do: ["lib"]
 
   defp ignore_for_test() do
-    [Clik.AddCommand, Clik.DoNothingCommand, Clik.ShowHelpCommand]
+    [Clik.AddCommand, Clik.DoNothingCommand, Clik.RequiredCommand, Clik.ShowHelpCommand]
   end
 end

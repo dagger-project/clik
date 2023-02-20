@@ -62,8 +62,10 @@ defmodule Clik.Option do
     end
   end
 
-  @spec help(t()) :: String.t()
-  def help(opt), do: opt.help
+  @spec help(t()) :: {String.t(), String.t(), String.t()}
+  def help(option) do
+    {format_flags(option), format_type(option), option.help}
+  end
 
   defp validate(option) do
     cond do
@@ -77,6 +79,19 @@ defmodule Clik.Option do
         {:ok, option}
     end
   end
+
+  defp format_flags(%__MODULE__{short: nil, long: long}) do
+    "--#{Atom.to_string(long)}"
+  end
+
+  defp format_flags(%__MODULE__{long: long, short: short}) do
+    "--#{Atom.to_string(long)}, -#{Atom.to_string(short)}"
+  end
+
+  defp format_type(%__MODULE__{type: :boolean}), do: "BOOL"
+  defp format_type(%__MODULE__{type: :string}), do: "STR"
+  defp format_type(%__MODULE__{type: :integer}), do: "INT"
+  defp format_type(%__MODULE__{type: :float}), do: "FLOAT"
 end
 
 defmodule Clik.Options do

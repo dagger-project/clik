@@ -25,6 +25,20 @@ defmodule Clik.Output.Document do
     %{doc | entries: [Break.new(amount) | doc.entries]}
   end
 
+  @spec column(t(), pos_integer(), String.t()) :: t()
+  def column(doc, width, data) do
+    padded_data =
+      case width - String.length(data) do
+        x when x < 1 ->
+          data
+
+        x ->
+          String.pad_trailing(data, x)
+      end
+
+    text(doc, padded_data)
+  end
+
   @spec text(t(), format_code(), data()) :: t()
   def text(doc, code \\ nil, data)
 

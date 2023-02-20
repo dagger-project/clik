@@ -66,16 +66,66 @@ defmodule Clik.Command do
       {:error, {:missing_option, name}} ->
         d = Document.empty() |> Document.line("Required option --#{name} is missing")
         Output.puts(err_output, Renderable.render(d))
+        :error
     end
   end
 
   defp show_help(cmd, script_name, device) do
-    d =
-      Document.empty()
-      |> Document.text("Usage: #{script_name}")
-      |> Document.break()
-      |> Document.text(cmd.cb_mod.help_text())
+    usage = "Usage: #{script_name} #{cmd.name}"
+    options = cmd.cb_mod.options()
 
-    Output.puts(device, Renderable.render(d))
+    doc =
+      Document.empty()
+      |> Document.line(usage)
+      |> Document.break()
+      |> Document.line(cmd.cb_mod.help_text())
+
+    final_doc =
+      if Enum.empty?(options) do
+        doc
+      else
+        option_help =
+          Enum.map(options, fn option ->
+            {flags, type, help} = Option.help(option)
+
+            {{String.length(flags), flags}, {String.length(type), type},
+             {String.length(help), help}}
+          end)
+
+        flag_col = column_width(option_help, 1)
+        type_col = column_width(option_help, 2)
+        help_col = column_width(option_help, 3)
+
+        Enum.reduce(options, doc, fn option, doc ->
+          {flag, type, help} = Option.help(option)
+
+          Document.column(doc, flag_col, flag)
+          |> Document.column(type_col, type)
+          |> Document.column(help_col, help)
+          |> Document.break()
+        end)
+      end
+
+    Output.puts(device, Renderable.render(final_doc))
+  end
+
+  defp column_width([], _), do: 1
+
+  defp column_width(option_help, column) do
+    {result, _} =
+      Enum.max_by(option_help, fn {{a, _}, {b, _}, {c, _}} ->
+        case column do
+          1 ->
+            a
+
+          2 ->
+            b
+
+          3 ->
+            c
+        end
+      end)
+
+    result
   end
 end
