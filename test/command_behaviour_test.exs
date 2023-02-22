@@ -6,7 +6,6 @@ defmodule Clik.CommandBehaviourTest do
 
   test "basic getters" do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
-    assert [] == Command.arguments(cmd)
     options = Command.options(cmd)
     assert 1 == length(options)
     assert "Says hello to the world" == Command.help_text(cmd)

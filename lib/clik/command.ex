@@ -5,12 +5,10 @@ defmodule Clik.Command do
 
   @type t :: %__MODULE__{}
   @type options :: [] | [Option.t()]
-  @type arguments :: [] | [Argument.t()]
   @type result :: :ok | {:error, atom()}
 
   @callback help_text() :: String.t()
   @callback options() :: options()
-  @callback arguments() :: arguments()
   @callback run(CommandEnvironment.t()) :: result()
 
   defmacro __using__(opts \\ []) do
@@ -23,10 +21,9 @@ defmodule Clik.Command do
 
       if unquote(stubs) do
         def options(), do: []
-        def arguments(), do: []
         def help_text(), do: ""
 
-        defoverridable(options: 0, arguments: 0, help_text: 0)
+        defoverridable(options: 0, help_text: 0)
       end
     end
   end
@@ -51,9 +48,6 @@ defmodule Clik.Command do
 
   @spec options(t()) :: options()
   def options(cmd), do: cmd.cb_mod.options()
-
-  @spec arguments(t()) :: arguments()
-  def arguments(cmd), do: cmd.cb_mod.arguments()
 
   @spec help_text(t()) :: String.t()
   def help_text(cmd), do: cmd.cb_mod.help_text()
