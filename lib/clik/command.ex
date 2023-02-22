@@ -20,7 +20,10 @@ defmodule Clik.Command do
       alias Clik.{Argument, CommandEnvironment, Option}
 
       if unquote(stubs) do
+        @impl true
         def options(), do: []
+
+        @impl true
         def help_text(), do: ""
 
         defoverridable(options: 0, help_text: 0)

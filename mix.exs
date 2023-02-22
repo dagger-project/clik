@@ -12,7 +12,8 @@ defmodule Clik.MixProject do
       deps: [],
       test_coverage: test_coverage(),
       aliases: aliases(),
-      preferred_cli_env: [cover: :test]
+      preferred_cli_env: [cover: :test],
+      escript: [main_module: Clik.Example.Main]
     ]
   end
 
@@ -44,6 +45,7 @@ defmodule Clik.MixProject do
     [
       Clik.DuplicateCommandError,
       Clik.DuplicateOptionError,
+      Clik.Renderable,
       Clik.UnknownCommandError,
       Clik.Test.HelloWorldCommand,
       Clik.Test.BarCommand,
