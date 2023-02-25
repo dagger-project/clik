@@ -32,4 +32,12 @@ defmodule Clik.TextRenderTest do
     expected_text = "\e[33mthis is a test\e[0m" <> Platform.eol_char()
     assert {"", expected_text} == StringIO.contents(fd)
   end
+
+  test "render appended text entries" do
+    {:ok, fd} = StringIO.open("")
+    t1 = Text.new("hello, ", false)
+    t2 = Text.append(t1, "world")
+    Renderable.render(t2, fd)
+    assert {"", "hello, world"} == StringIO.contents(fd)
+  end
 end

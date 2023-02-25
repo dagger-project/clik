@@ -19,8 +19,18 @@ defmodule Clik.Output.Document do
 end
 
 defimpl Clik.Renderable, for: Clik.Output.Document do
+  alias Clik.Renderable
+
   def render(doc, out) do
     Enum.reverse(doc.entries)
-    |> Enum.each(&Clik.Renderable.render(&1, out))
+    |> Enum.reduce_while({:ok, out}, fn entry, {:ok, out} ->
+      case Renderable.render(entry, out) do
+        {:ok, updated} ->
+          {:cont, {:ok, updated}}
+
+        error ->
+          {:halt, error}
+      end
+    end)
   end
 end

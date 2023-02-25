@@ -12,12 +12,6 @@ defmodule Clik.Output.Text do
   def append(t, new_text) do
     %{t | text: t.text <> new_text}
   end
-
-  @spec concat(t(), t()) :: t()
-  def concat(left, right) do
-    include_eol = left.eol? or right.eol?
-    %__MODULE__{eol?: include_eol, text: left.text <> right.text}
-  end
 end
 
 defimpl Clik.Renderable, for: Clik.Output.Text do
@@ -32,10 +26,17 @@ defimpl Clik.Renderable, for: Clik.Output.Text do
         text.text
       end
 
-    if text.eol? do
-      IO.write(out, output <> Platform.eol_char())
+    result =
+      if text.eol? do
+        IO.write(out, output <> Platform.eol_char())
+      else
+        IO.write(out, output)
+      end
+
+    if result == :ok do
+      {:ok, out}
     else
-      IO.write(out, output)
+      {:error, :io}
     end
   end
 end
