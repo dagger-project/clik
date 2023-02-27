@@ -7,18 +7,19 @@ defmodule Clik.ConfigurationTest do
   describe "registering commands" do
     test "empty configuration" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_command(
                  Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
                )
 
-      assert 0 == Enum.count(config.global_options)
+      # Must account for built-in global --help option
+      assert 1 == Enum.count(config.global_options)
       assert 1 == Enum.count(config.commands)
     end
 
     test "configuration with a global option" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_global_option(Option.new!(:retry, type: :boolean))
 
       config =
@@ -28,7 +29,7 @@ defmodule Clik.ConfigurationTest do
         )
 
       # Merged set of global and command options
-      assert [:retry, :verbose] ==
+      assert [:help, :retry, :verbose] ==
                Configuration.options!(config, :hello_world) |> Map.keys() |> Enum.sort()
     end
 
@@ -36,7 +37,7 @@ defmodule Clik.ConfigurationTest do
       opt = Option.new!(:retry, type: :boolean)
 
       assert_raise DuplicateOptionError, fn ->
-        %Configuration{}
+        Configuration.new()
         |> Configuration.add_global_option!(opt)
         |> Configuration.add_global_option!(opt)
       end
@@ -44,7 +45,7 @@ defmodule Clik.ConfigurationTest do
 
     test "configuration and command with conflicting options" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_global_option(Option.new!(:verbose, type: :boolean))
 
       assert {:error, :duplicate_option, option} =
@@ -58,7 +59,7 @@ defmodule Clik.ConfigurationTest do
 
     test "configuration and command with conflicting options raises error" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_global_option(Option.new!(:verbose, type: :boolean))
 
       assert_raise DuplicateOptionError, fn ->
@@ -71,7 +72,7 @@ defmodule Clik.ConfigurationTest do
 
     test "look up command by name" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_command(Command.new!(:hello, Clik.Test.HelloWorldCommand))
 
       assert {:ok, cmd} = Configuration.command(config, :hello)
@@ -81,7 +82,7 @@ defmodule Clik.ConfigurationTest do
 
     test "look up unknown command by name" do
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_command(Command.new!(:hello, Clik.Test.HelloWorldCommand))
 
       assert {:error, :unknown_command} == Configuration.command(config, :goodbye)
@@ -92,7 +93,7 @@ defmodule Clik.ConfigurationTest do
       cmd = Command.new!(:hello, Clik.Test.HelloWorldCommand)
 
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_command(cmd)
 
       refute Configuration.has_default?(config)
@@ -104,7 +105,7 @@ defmodule Clik.ConfigurationTest do
       cmd = Command.new!(:default, Clik.Test.HelloWorldCommand)
 
       assert {:ok, config} =
-               %Configuration{}
+               Configuration.new()
                |> Configuration.add_command(Command.new!(:hello, Clik.Test.HelloWorldCommand))
 
       assert {:ok, config} = Configuration.add_command(config, cmd)
@@ -116,7 +117,7 @@ defmodule Clik.ConfigurationTest do
     test "retrieve command options" do
       {:ok, config} =
         Configuration.add_command(
-          %Configuration{},
+          Configuration.new(),
           Command.new!(:hello, Clik.Test.HelloWorldCommand)
         )
 
@@ -129,36 +130,44 @@ defmodule Clik.ConfigurationTest do
     end
 
     test "retrieve options for unknown command" do
-      assert {:error, :unknown_command} == Configuration.options(%Configuration{}, :hello)
-      assert_raise UnknownCommandError, fn -> Configuration.options!(%Configuration{}, :hello) end
+      assert {:error, :unknown_command} == Configuration.options(Configuration.new(), :hello)
+
+      assert_raise UnknownCommandError, fn ->
+        Configuration.options!(Configuration.new(), :hello)
+      end
     end
 
     test "prepare global options for parsing" do
       config =
         Configuration.add_command!(
-          %Configuration{},
+          Configuration.new(),
           Command.new!(:hello, Clik.Test.HelloWorldCommand)
         )
         |> Configuration.add_global_option!(Option.new!(:dry_run, type: :boolean, short: :d))
 
-      assert {:ok, [strict: [help: :boolean, dry_run: :boolean], aliases: [d: :dry_run]]} ==
+      assert {:ok,
+              [strict: [help: :boolean, dry_run: :boolean], aliases: [h: :help, d: :dry_run]]} ==
                Configuration.prepare(config)
     end
 
     test "prepare command options for parsing" do
       config =
         Configuration.add_command!(
-          %Configuration{},
+          Configuration.new(),
           Command.new!(:hello, Clik.Test.HelloWorldCommand)
         )
         |> Configuration.add_global_option!(Option.new!(:dry_run, type: :boolean, short: :d))
 
-      assert {:ok, [{:strict, [verbose: :count, dry_run: :boolean]}, {:aliases, [d: :dry_run]}]} ==
+      assert {:ok,
+              [
+                {:strict, [verbose: :count, help: :boolean, dry_run: :boolean]},
+                {:aliases, [h: :help, d: :dry_run]}
+              ]} ==
                Configuration.prepare(config, :hello)
     end
 
     test "prepare options for unknown command" do
-      assert {:error, :unknown_command} == Configuration.prepare(%Configuration{}, :hello)
+      assert {:error, :unknown_command} == Configuration.prepare(Configuration.new(), :hello)
     end
   end
 end

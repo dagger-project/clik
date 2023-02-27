@@ -12,6 +12,14 @@ defmodule Clik.Configuration do
           commands: %{atom() => Command.t()}
         }
 
+  @doc "Creates a new `Clik.Configuration` instance"
+  @doc since: "0.1.0"
+  @spec new() :: t()
+  def new() do
+    help = Option.new!(:help, type: :boolean, short: :h, help: "Display this help text")
+    add_global_option!(%__MODULE__{}, help)
+  end
+
   @doc """
   Add a global option to the application configuration.
 
@@ -20,15 +28,10 @@ defmodule Clik.Configuration do
   @doc since: "0.1.0"
   @spec add_global_option(t(), Option.t()) :: {:ok, t()} | {:error, :duplicate}
   def add_global_option(config, option) do
-    cond do
-      option.name == :help ->
-        {:error, :duplicate}
-
-      Map.has_key?(config.global_options, option.name) ->
-        {:error, :duplicate}
-
-      true ->
-        {:ok, %{config | global_options: Map.put(config.global_options, option.name, option)}}
+    if Map.has_key?(config.global_options, option.name) do
+      {:error, :duplicate}
+    else
+      {:ok, %{config | global_options: Map.put(config.global_options, option.name, option)}}
     end
   end
 
