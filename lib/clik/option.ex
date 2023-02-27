@@ -4,8 +4,13 @@ defmodule Clik.Option do
   """
   defstruct [:default, :help, :hidden, :long, :name, :required, :short, :type]
 
+  @typedoc "Valid option types"
   @type option_type :: :float | :integer | :string | :boolean | :count
+
+  @typedoc "Valid option value types"
   @type option_value :: float() | integer() | String.t() | boolean()
+
+  @typedoc "Individual options used to configure an instance of `Clik.Option`"
   @type opt ::
           {:default, option_value()}
           | {:help, String.t()}
@@ -14,9 +19,13 @@ defmodule Clik.Option do
           | {:required, boolean()}
           | {:short, atom()}
           | {:type, option_type()}
+
+  @typedoc "Set of configuration options used to configure an instance of `Clik.Option`"
   @type opts :: [] | [opt()]
+
   @type error :: {:error, atom()}
 
+  @typedoc "Struct corresponding to a single CLI flag or switch"
   @type t :: %__MODULE__{
           default: option_type() | nil,
           help: String.t(),
@@ -40,6 +49,7 @@ defmodule Clik.Option do
 
   Returns `{:ok, t}` or `{:error, reason}`.
   """
+  @doc since: "0.1.0"
   @spec new(atom(), opts()) :: {:ok, t()} | error()
   def new(name, opts \\ []) do
     validate(%__MODULE__{
@@ -54,6 +64,11 @@ defmodule Clik.Option do
     })
   end
 
+  @doc """
+  Creates a new `Clik.Option` instance.
+
+  Raises `ArgumentError` on error.
+  """
   @spec new!(atom(), opts()) :: t() | no_return()
   def new!(name, opts \\ []) do
     case new(name, opts) do
@@ -65,6 +80,7 @@ defmodule Clik.Option do
     end
   end
 
+  @doc false
   @spec prepare(t()) :: {{atom(), option_type()}, nil | {atom(), atom()}}
   def prepare(option) do
     long_form = {option.long, option.type}
