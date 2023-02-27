@@ -9,11 +9,12 @@ defmodule Clik.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: elixirc_options(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: [],
+      deps: deps(),
       test_coverage: test_coverage(),
       aliases: aliases(),
       preferred_cli_env: [cover: :test],
-      escript: [main_module: Clik.Example.Main]
+      escript: [main_module: Clik.Example.Main],
+      dialyzer: dialyzer()
     ]
   end
 
@@ -22,6 +23,10 @@ defmodule Clik.MixProject do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  def deps do
+    [{:dialyxir, "~> 1.2.0", only: [:dev, :test], runtime: false}]
   end
 
   defp test_coverage() do
@@ -50,6 +55,20 @@ defmodule Clik.MixProject do
       Clik.Test.HelloWorldCommand,
       Clik.Test.BarCommand,
       Clik.Test.BazCommand
+    ]
+  end
+
+  defp dialyzer() do
+    [plt_add_deps: :apps_direct, flags: dialyzer_flags()]
+  end
+
+  defp dialyzer_flags() do
+    [
+      "-Wunmatched_returns",
+      "-Wextra_return",
+      "-Wmissing_return",
+      :error_handling,
+      :underspecs
     ]
   end
 end

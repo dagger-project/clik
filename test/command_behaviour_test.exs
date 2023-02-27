@@ -20,14 +20,14 @@ defmodule Clik.CommandBehaviourTest do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
     registry = Registry.add_command!(%Registry{}, cmd)
     assert :ok == Clik.run(registry, ["hello_world"])
-    assert {:error, :no_default} == Clik.run(registry, [])
+    assert :no_default == Clik.run(registry, [])
   end
 
   test "execute a command w/high-level interface and bad command name" do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
     registry = Registry.add_command!(%Registry{}, cmd)
-    assert {:error, {:unknown_command, "hello"}} == Clik.run(registry, ["hello"])
-    assert {:error, :no_default} == Clik.run(registry, [])
+    assert {:unknown_command, "hello"} == Clik.run(registry, ["hello"])
+    assert :no_default == Clik.run(registry, [])
   end
 
   test "execute a command w/high-level interface and default command" do
@@ -40,7 +40,7 @@ defmodule Clik.CommandBehaviourTest do
 
   test "execute command w/high-level interface and missing required option" do
     registry = Registry.add_command!(%Registry{}, Command.new!(:bar, Clik.Test.BarCommand))
-    assert {:error, {:missing_option, :foo}} == Clik.run(registry, ["bar"])
+    assert {:missing_option, :foo} == Clik.run(registry, ["bar"])
   end
 
   test "execute command w/high-level interface and required option" do
@@ -51,7 +51,7 @@ defmodule Clik.CommandBehaviourTest do
   test "execute command w/high-level interface and unknown options" do
     registry = Registry.add_command!(%Registry{}, Command.new!(:bar, Clik.Test.BarCommand))
 
-    assert {:error, {:unknown_options, ["--bar", "--baz"]}} ==
+    assert {:unknown_options, ["--bar", "--baz"]} ==
              Clik.run(registry, ["bar", "--foo", "abc", "--bar", "--baz"])
   end
 

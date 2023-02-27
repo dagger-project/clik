@@ -3,7 +3,10 @@ defmodule Clik.Registry do
   alias Clik.{Command, Option}
   alias Clik.{DuplicateCommandError, DuplicateOptionError, UnknownCommandError}
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          global_options: %{atom() => Option.t()},
+          commands: %{atom() => Command.t()}
+        }
 
   @spec add_global_option(t(), Option.t()) :: {:ok, t()} | {:error, :duplicate}
   def add_global_option(registry, option) do

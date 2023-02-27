@@ -1,7 +1,13 @@
 defmodule Clik.Output.Text do
+  alias IO.ANSI
+  alias Clik.Output.Platform
   defstruct [:eol?, :code, :text]
 
-  @type t :: %__MODULE__{}
+  @type t :: %__MODULE__{
+          eol?: boolean(),
+          code: atom(),
+          text: String.t()
+        }
 
   @spec new(atom(), bitstring(), boolean()) :: t()
   def new(code \\ nil, text, include_eol) do
@@ -12,13 +18,9 @@ defmodule Clik.Output.Text do
   def append(t, new_text) do
     %{t | text: t.text <> new_text}
   end
-end
 
-defimpl Clik.Renderable, for: Clik.Output.Text do
-  alias IO.ANSI
-  alias Clik.Output.Platform
-
-  def render(text, out) do
+  @spec format(t()) :: String.t()
+  def format(text) do
     output =
       if text.code != nil do
         ANSI.format([text.code, text.text]) |> :erlang.iolist_to_binary()
@@ -26,17 +28,10 @@ defimpl Clik.Renderable, for: Clik.Output.Text do
         text.text
       end
 
-    result =
-      if text.eol? do
-        IO.write(out, output <> Platform.eol_char())
-      else
-        IO.write(out, output)
-      end
-
-    if result == :ok do
-      {:ok, out}
+    if text.eol? do
+      output <> Platform.eol_char()
     else
-      {:error, :io}
+      output
     end
   end
 end

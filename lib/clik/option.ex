@@ -1,7 +1,6 @@
 defmodule Clik.Option do
   defstruct [:default, :help, :hidden, :long, :name, :required, :short, :type]
 
-  @type t :: %__MODULE__{}
   @type option_type :: :float | :integer | :string | :boolean | :count
   @type option_value :: float() | integer() | String.t() | boolean()
   @type opt ::
@@ -14,6 +13,16 @@ defmodule Clik.Option do
           | {:type, option_type()}
   @type opts :: [] | [opt()]
   @type error :: {:error, atom()}
+
+  @type t :: %__MODULE__{
+          default: option_type() | nil,
+          help: String.t(),
+          hidden: boolean(),
+          long: atom(),
+          required: boolean(),
+          short: atom(),
+          type: option_type()
+        }
 
   @default_default nil
   @default_help ""

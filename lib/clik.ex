@@ -3,7 +3,11 @@ defmodule Clik do
   alias Clik.{Command, Registry}
 
   @type argv :: [] | [String.t()]
-  @type result :: :ok | :error | {:error, atom()} | {:error, {atom(), term()}}
+  @type error ::
+          {:missing_option, atom()}
+          | {:unknown_command, atom()}
+          | {:unknown_options, [String.t()]}
+  @type result :: :ok | error()
 
   @spec run(Registry.t(), argv()) :: result()
   def run(registry, args) do
@@ -31,7 +35,7 @@ defmodule Clik do
 
       {_, _, errors} ->
         option_names = for {option, _} <- errors, do: option
-        {:error, {:unknown_options, option_names}}
+        {:unknown_options, option_names}
     end
   end
 
@@ -41,7 +45,7 @@ defmodule Clik do
         if Registry.has_command?(registry, :default) do
           {:ok, :default}
         else
-          {:error, {:unknown_command, name}}
+          {:unknown_command, name}
         end
 
       converted ->
@@ -53,7 +57,7 @@ defmodule Clik do
             {:ok, :default}
 
           true ->
-            {:error, {:unknown_command, name}}
+            {:unknown_command, name}
         end
     end
   end
@@ -78,20 +82,20 @@ defmodule Clik do
                 env = %CommandEnvironment{options: updated_options, arguments: remaining}
                 run_command(cmd, env)
 
-              {:error, :missing_option, name} ->
-                {:error, {:missing_option, name}}
+              error ->
+                error
             end
 
           {_, _, errors} ->
             option_names = for {option, _} <- errors, do: option
-            {:error, {:unknown_options, option_names}}
+            {:unknown_options, option_names}
         end
 
       {:error, :unknown_command} ->
         if cmd_name == :default do
-          {:error, :no_default}
+          :no_default
         else
-          {:error, {:unknown_command, cmd_name}}
+          {:unknown_command, cmd_name}
         end
     end
   end
@@ -117,7 +121,7 @@ defmodule Clik do
       if Keyword.has_key?(parsed, opt.long) do
         {:cont, true}
       else
-        {:halt, {:error, :missing_option, opt.long}}
+        {:halt, {:missing_option, opt.long}}
       end
     end)
   end
