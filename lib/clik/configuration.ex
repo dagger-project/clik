@@ -20,10 +20,15 @@ defmodule Clik.Configuration do
   @doc since: "0.1.0"
   @spec add_global_option(t(), Option.t()) :: {:ok, t()} | {:error, :duplicate}
   def add_global_option(config, option) do
-    if Map.has_key?(config.global_options, option.name) do
-      {:error, :duplicate}
-    else
-      {:ok, %{config | global_options: Map.put(config.global_options, option.name, option)}}
+    cond do
+      option.name == :help ->
+        {:error, :duplicate}
+
+      Map.has_key?(config.global_options, option.name) ->
+        {:error, :duplicate}
+
+      true ->
+        {:ok, %{config | global_options: Map.put(config.global_options, option.name, option)}}
     end
   end
 
@@ -177,7 +182,15 @@ defmodule Clik.Configuration do
 
   def prepare(config, nil) do
     {switches, aliases} = prepare_options(config.global_options)
-    {:ok, [strict: switches, aliases: aliases]}
+
+    updated =
+      if not Keyword.has_key?(switches, :help) do
+        [{:help, :boolean} | switches]
+      else
+        switches
+      end
+
+    {:ok, [strict: updated, aliases: aliases]}
   end
 
   def prepare(config, command_name) do

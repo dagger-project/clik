@@ -141,7 +141,7 @@ defmodule Clik.ConfigurationTest do
         )
         |> Configuration.add_global_option!(Option.new!(:dry_run, type: :boolean, short: :d))
 
-      assert {:ok, [strict: [dry_run: :boolean], aliases: [d: :dry_run]]} ==
+      assert {:ok, [strict: [help: :boolean, dry_run: :boolean], aliases: [d: :dry_run]]} ==
                Configuration.prepare(config)
     end
 
