@@ -1,4 +1,7 @@
 defmodule Clik.Option do
+  @moduledoc """
+  Configurable CLI flag.
+  """
   defstruct [:default, :help, :hidden, :long, :name, :required, :short, :type]
 
   @type option_type :: :float | :integer | :string | :boolean | :count
@@ -32,6 +35,11 @@ defmodule Clik.Option do
   @default_type :string
   @valid_types [:boolean, :count, :float, :integer, :string]
 
+  @doc """
+  Creates a new `Clik.Option` instance.
+
+  Returns `{:ok, t}` or `{:error, reason}`.
+  """
   @spec new(atom(), opts()) :: {:ok, t()} | error()
   def new(name, opts \\ []) do
     validate(%__MODULE__{

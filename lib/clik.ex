@@ -1,24 +1,55 @@
 defmodule Clik do
   alias Clik.CommandEnvironment
-  alias Clik.{Command, Registry}
+  alias Clik.{Command, Configuration}
+  alias Clik.Output.Platform
 
+  @typedoc "Raw args from CLI"
   @type argv :: [] | [String.t()]
+
+  @typedoc "Error during arg parsing or command dispatch"
   @type error ::
           {:missing_option, atom()}
           | {:unknown_command, atom()}
           | {:unknown_options, [String.t()]}
+          | {:error, atom()}
+
+  @typedoc "Execution result"
   @type result :: :ok | error()
 
-  @spec run(Registry.t(), argv()) :: result()
-  def run(registry, args) do
-    {:ok, global_opts} = Registry.prepare(registry)
+  @doc """
+  CLI execution entry point.
+
+  Parses CLI args based on the configuration and calls the correct command.
+  `run/2` should be called from the main function.
+
+  ## Example
+  ```
+  defmodule MyCLIApp do
+    alias Clik.Configuration
+
+    def main(args) do
+      config =
+        Configuration.add_command!(%Configuration{}, Command.new!(:default, MyCLIApp.DefaultCommand))
+      case Clik.run(config, args) do
+        :ok ->
+          :erlang.halt(0)
+        {:error, reason} ->
+          :erlang.halt(1)
+    end
+  end
+  ```
+  """
+  @doc since: "0.1.0"
+  @spec run(Configuration.t(), argv()) :: result()
+  def run(config, args) do
+    {:ok, global_opts} = Configuration.prepare(config)
 
     case OptionParser.parse_head(args, global_opts) do
       {_parsed, [], []} ->
-        dispatch_to(registry, args, :default)
+        dispatch_to(config, args, :default)
 
       {_parsed, [cmd_name | _], []} ->
-        case resolve_command_name(registry, cmd_name) do
+        case resolve_command_name(config, cmd_name) do
           {:ok, resolved} ->
             {final_args, final_cmd} =
               if resolved != :default do
@@ -27,7 +58,7 @@ defmodule Clik do
                 {args, resolved}
               end
 
-            dispatch_to(registry, final_args, final_cmd)
+            dispatch_to(config, final_args, final_cmd)
 
           error ->
             error
@@ -39,10 +70,10 @@ defmodule Clik do
     end
   end
 
-  defp resolve_command_name(registry, name) do
+  defp resolve_command_name(config, name) do
     case convert_command_name(name) do
       nil ->
-        if Registry.has_command?(registry, :default) do
+        if Configuration.has_command?(config, :default) do
           {:ok, :default}
         else
           {:unknown_command, name}
@@ -50,10 +81,10 @@ defmodule Clik do
 
       converted ->
         cond do
-          Registry.has_command?(registry, converted) ->
+          Configuration.has_command?(config, converted) ->
             {:ok, converted}
 
-          Registry.has_command?(registry, :default) ->
+          Configuration.has_command?(config, :default) ->
             {:ok, :default}
 
           true ->
@@ -71,15 +102,21 @@ defmodule Clik do
     end
   end
 
-  defp dispatch_to(registry, args, cmd_name) do
-    case Registry.prepare(registry, cmd_name) do
+  defp dispatch_to(config, args, cmd_name) do
+    case Configuration.prepare(config, cmd_name) do
       {:ok, options} ->
         case OptionParser.parse(args, options) do
           {parsed, remaining, []} ->
-            case check_parsed_options(registry, cmd_name, parsed) do
+            case check_parsed_options(config, cmd_name, parsed) do
               {:ok, updated_options} ->
-                cmd = Registry.command!(registry, cmd_name)
-                env = %CommandEnvironment{options: updated_options, arguments: remaining}
+                cmd = Configuration.command!(config, cmd_name)
+
+                env = %CommandEnvironment{
+                  script: Platform.script_name(),
+                  options: updated_options,
+                  arguments: remaining
+                }
+
                 run_command(cmd, env)
 
               error ->
@@ -100,9 +137,9 @@ defmodule Clik do
     end
   end
 
-  defp check_parsed_options(registry, cmd_name, parsed) do
+  defp check_parsed_options(config, cmd_name, parsed) do
     {required, defaults} =
-      Registry.options!(registry, cmd_name)
+      Configuration.options!(config, cmd_name)
       |> Map.values()
       |> Enum.filter(&(&1.required == true or &1.default != nil))
       |> Enum.split_with(&(&1.required == true))

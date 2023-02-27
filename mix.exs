@@ -4,7 +4,9 @@ defmodule Clik.MixProject do
   def project do
     [
       app: :clik,
-      version: "0.1.0",
+      description: "CLI app library",
+      package: package(),
+      version: "0.2.1",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: elixirc_options(Mix.env()),
@@ -26,7 +28,10 @@ defmodule Clik.MixProject do
   end
 
   def deps do
-    [{:dialyxir, "~> 1.2.0", only: [:dev, :test], runtime: false}]
+    [
+      {:dialyxir, "~> 1.2.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.29.1", runtime: false}
+    ]
   end
 
   defp test_coverage() do
@@ -69,6 +74,12 @@ defmodule Clik.MixProject do
       "-Wmissing_return",
       :error_handling,
       :underspecs
+    ]
+  end
+
+  defp package() do
+    [
+      licenses: ["Apache-2.0"]
     ]
   end
 end

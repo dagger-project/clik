@@ -4,7 +4,7 @@ defmodule Clik.DocRenderTest do
   alias Clik.Output.Document
 
   test "render empty doc" do
-    d = Document.new()
+    d = Document.empty()
     {:ok, fd} = StringIO.open("")
     assert {:ok, _} = Renderable.render(d, fd)
     assert {"", ""} == StringIO.contents(fd)
@@ -12,7 +12,7 @@ defmodule Clik.DocRenderTest do
 
   test "render doc with text" do
     d =
-      Document.new()
+      Document.empty()
       |> Document.text("hello, ")
       |> Document.text("world")
 
@@ -23,7 +23,7 @@ defmodule Clik.DocRenderTest do
 
   test "render doc with lines" do
     d =
-      Document.new()
+      Document.empty()
       |> Document.line("hello, world!")
       |> Document.line(:green, "mwhat's up?")
 

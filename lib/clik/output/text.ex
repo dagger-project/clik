@@ -1,4 +1,10 @@
 defmodule Clik.Output.Text do
+  @moduledoc """
+  Formatted block of text.
+
+  Represents either a partial or full line of text. Lines are terminated with the
+  correct terminator based on platform.
+  """
   alias IO.ANSI
   alias Clik.Output.Platform
   defstruct [:eol?, :code, :text]
