@@ -2,7 +2,7 @@ defmodule Clik.Configuration do
   @moduledoc """
   Collects commands and global options.
   """
-  defstruct global_options: %{}, commands: %{}
+  defstruct global_options: %{}, commands: %{}, script_help: nil
   alias Clik.{Command, Option}
   alias Clik.{DuplicateCommandError, DuplicateOptionError, UnknownCommandError}
 
@@ -15,9 +15,9 @@ defmodule Clik.Configuration do
   @doc "Creates a new `Clik.Configuration` instance"
   @doc since: "0.1.0"
   @spec new() :: t()
-  def new() do
-    help = Option.new!(:help, type: :boolean, short: :h, help: "Display this help text")
-    add_global_option!(%__MODULE__{}, help)
+  def new(script_help \\ nil) do
+    help = Option.new!(:help, type: :boolean, short: :h, help: "display this help text")
+    add_global_option!(%__MODULE__{script_help: script_help}, help)
   end
 
   @doc """

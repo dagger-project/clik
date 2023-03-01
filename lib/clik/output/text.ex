@@ -6,7 +6,7 @@ defmodule Clik.Output.Text do
   correct terminator based on platform.
   """
   alias IO.ANSI
-  alias Clik.Output.Platform
+  alias Clik.Platform
   defstruct [:eol?, :code, :text]
 
   @type t :: %__MODULE__{

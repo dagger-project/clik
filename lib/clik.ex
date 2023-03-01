@@ -1,7 +1,7 @@
 defmodule Clik do
   alias Clik.CommandEnvironment
   alias Clik.{Command, Configuration}
-  alias Clik.Output.Platform
+  alias Clik.Output.HelpFormatter
 
   @typedoc "Raw args from CLI"
   @type argv :: [] | [String.t()]
@@ -40,15 +40,19 @@ defmodule Clik do
   ```
   """
   @doc since: "0.1.0"
-  @spec run(Configuration.t(), argv()) :: result()
-  def run(config, args) do
+  @spec run(Configuration.t(), argv(), CommandEnvironment.t()) :: result()
+  def run(config, args, env) do
     {:ok, global_opts} = Configuration.prepare(config)
 
-    case OptionParser.parse_head(args, global_opts) do
-      {_parsed, [], []} ->
-        dispatch_to(config, args, :default)
+    case OptionParser.parse(args, global_opts) do
+      {parsed, [], []} ->
+        if Keyword.get(parsed, :help, false) do
+          show_script_help(config, env)
+        else
+          dispatch_to(config, env, args, :default)
+        end
 
-      {_parsed, [cmd_name | _], []} ->
+      {parsed, [cmd_name | _], []} ->
         case resolve_command_name(config, cmd_name) do
           {:ok, resolved} ->
             {final_args, final_cmd} =
@@ -58,7 +62,11 @@ defmodule Clik do
                 {args, resolved}
               end
 
-            dispatch_to(config, final_args, final_cmd)
+            if Keyword.get(parsed, :help, false) do
+              show_command_help(config, env, resolved)
+            else
+              dispatch_to(config, env, final_args, final_cmd)
+            end
 
           error ->
             error
@@ -102,7 +110,7 @@ defmodule Clik do
     end
   end
 
-  defp dispatch_to(config, args, cmd_name) do
+  defp dispatch_to(config, env, args, cmd_name) do
     case Configuration.prepare(config, cmd_name) do
       {:ok, options} ->
         case OptionParser.parse(args, options) do
@@ -110,14 +118,7 @@ defmodule Clik do
             case check_parsed_options(config, cmd_name, parsed) do
               {:ok, updated_options} ->
                 cmd = Configuration.command!(config, cmd_name)
-
-                env = %CommandEnvironment{
-                  script: Platform.script_name(),
-                  options: updated_options,
-                  arguments: remaining
-                }
-
-                run_command(cmd, env)
+                run_command(cmd, %{env | options: updated_options, arguments: remaining})
 
               error ->
                 error
@@ -178,5 +179,15 @@ defmodule Clik do
 
   defp run_command(cmd, env) do
     Command.run(cmd, env)
+  end
+
+  defp show_script_help(config, env) do
+    doc = HelpFormatter.script_help(config)
+    Clik.Renderable.render(doc, env.output)
+  end
+
+  defp show_command_help(config, env, cmd_name) do
+    doc = HelpFormatter.command_help(config, cmd_name)
+    Clik.Renderable.render(doc, env.output)
   end
 end

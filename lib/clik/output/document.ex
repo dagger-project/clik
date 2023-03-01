@@ -3,7 +3,7 @@ defmodule Clik.Output.Document do
   Formatted terminal output.
   """
   alias IO.ANSI
-  alias Clik.Output.Text
+  alias Clik.Output.{Table, Text}
 
   @enforce_keys [:entries]
   defstruct entries: []
@@ -27,8 +27,22 @@ defmodule Clik.Output.Document do
   end
 
   @doc "Add a line to a document"
-  @spec line(t(), code(), bitstring()) :: t()
+  @spec line(t(), code(), String.t()) :: t()
   def line(doc, code \\ nil, text) do
     %{doc | entries: [Text.new(code, text, true) | doc.entries]}
+  end
+
+  @doc "Adds a section header to a document"
+  @spec section_head(t(), code(), String.t()) :: t()
+  def section_head(doc, code \\ nil, text) do
+    title = Text.new(code, text, true)
+    underscore = Text.new(String.duplicate("-", String.length(text)), true)
+    %{doc | entries: [underscore, title | doc.entries]}
+  end
+
+  @doc "Add table to document"
+  @spec table(t(), Table.t()) :: t()
+  def table(doc, table) do
+    %{doc | entries: [table | doc.entries]}
   end
 end

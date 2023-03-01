@@ -1,7 +1,7 @@
 defmodule Clik.TextRenderTest do
   use ExUnit.Case, async: true
-  alias Clik.Renderable
-  alias Clik.Output.{Text, Platform}
+  alias Clik.{Platform, Renderable}
+  alias Clik.Output.Text
 
   test "render simple string" do
     {:ok, fd} = StringIO.open("")
