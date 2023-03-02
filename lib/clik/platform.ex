@@ -19,24 +19,38 @@ defmodule Clik.Platform do
 
   def terminal_width() do
     try do
-      case System.cmd("which", ["tput"]) do
-        {path, 0} ->
-          tput_cmd = String.trim(path)
+      case locate_tty_utility() do
+        nil ->
+          @default_term_width
 
-          case System.cmd(tput_cmd, ["cols"]) do
+        tty_utility ->
+          case System.cmd(tty_utility, ["cols"]) do
             {text_width, 0} ->
               String.to_integer(String.trim(text_width))
 
             _ ->
               @default_term_width
           end
-
-        _ ->
-          @default_term_width
       end
     rescue
       ErlangError ->
         @default_term_width
+    end
+  end
+
+  defp locate_tty_utility() do
+    case Application.get_env(:clik, :tty_utility, nil) do
+      nil ->
+        case System.cmd("which", ["tput"]) do
+          {path, 0} ->
+            String.trim(path)
+
+          _ ->
+            nil
+        end
+
+      path ->
+        path
     end
   end
 end
