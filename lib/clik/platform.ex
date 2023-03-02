@@ -8,7 +8,9 @@ defmodule Clik.Platform do
   end
 
   def eol_char() do
-    case :os.type() do
+    os_module = Application.get_env(:clik, :os_detector, :os)
+
+    case os_module.type() do
       {:unix, _} ->
         "\n"
 
