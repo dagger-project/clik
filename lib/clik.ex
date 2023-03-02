@@ -52,7 +52,7 @@ defmodule Clik do
           dispatch_to(config, env, args, :default)
         end
 
-      {parsed, [cmd_name | _], []} ->
+      {parsed, [cmd_name | _], _} ->
         case resolve_command_name(config, cmd_name) do
           {:ok, resolved} ->
             {final_args, final_cmd} =
