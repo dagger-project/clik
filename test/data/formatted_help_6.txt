@@ -1,6 +1,7 @@
-USAGE: mix -d -h
+USAGE: mix <cmd>  -h
+Commands: bar
+
 
 Global options
 --------------
--d             Do not update               
 -h,--help      display this help text      

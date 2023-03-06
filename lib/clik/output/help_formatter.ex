@@ -52,13 +52,9 @@ defmodule Clik.Output.HelpFormatter do
         Table.add_row(flags, [format_option(option, true), format_option_help(option)])
       end)
 
-    if Table.size(flags) > 0 do
-      Document.line(doc, "")
-      |> Document.section_head(@global_option_section_name)
-      |> Document.table(flags)
-    else
-      doc
-    end
+    Document.line(doc, "")
+    |> Document.section_head(@global_option_section_name)
+    |> Document.table(flags)
   end
 
   def command_help(config, cmd_name) do

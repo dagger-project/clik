@@ -1,0 +1,8 @@
+USAGE: mix <cmd>  -d -h
+Commands: bar
+
+
+Global options
+--------------
+-d,--dry-run      Do not update               
+-h,--help         display this help text      

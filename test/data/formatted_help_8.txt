@@ -1,0 +1,10 @@
+Says hello to the world
+USAGE: mix default  -h  --verbose
+
+Global options
+--------------
+-h,--help      display this help text      
+
+Command options
+---------------
+--verbose            
