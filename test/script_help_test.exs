@@ -1,6 +1,7 @@
 defmodule Clik.HelpFormatterTest do
   use ExUnit.Case, async: true
-  alias Clik.{Command, Configuration, Option, Renderable}
+
+  alias Clik.{Configuration, Option, Renderable}
   alias Clik.Output.HelpFormatter
 
   test "config w/script help, no global options, no commands" do
@@ -22,6 +23,29 @@ defmodule Clik.HelpFormatterTest do
     doc = HelpFormatter.script_help(config)
     {:ok, fd} = StringIO.open("")
     expected = File.read!("test/data/formatted_help_2.txt")
+    Renderable.render(doc, fd)
+    assert {"", expected} == StringIO.contents(fd)
+  end
+
+  test "config, no script help, no global options, no commands" do
+    config = Configuration.new()
+    doc = HelpFormatter.script_help(config)
+    {:ok, fd} = StringIO.open("")
+    expected = File.read!("test/data/formatted_help_3.txt")
+    Renderable.render(doc, fd)
+    assert {"", expected} == StringIO.contents(fd)
+  end
+
+  test "config, no script help, global options, no commands" do
+    config =
+      Configuration.new()
+      |> Configuration.add_global_option!(
+        Option.new!(:dry_run, type: :boolean, help: "Do not update", short: :d)
+      )
+
+    doc = HelpFormatter.script_help(config)
+    {:ok, fd} = StringIO.open("")
+    expected = File.read!("test/data/formatted_help_4.txt")
     Renderable.render(doc, fd)
     assert {"", expected} == StringIO.contents(fd)
   end

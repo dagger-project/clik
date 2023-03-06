@@ -1,0 +1,6 @@
+USAGE: mix -d -h
+
+Global options
+--------------
+-d,--dry-run      Do not update               
+-h,--help         display this help text      
