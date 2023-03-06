@@ -1,4 +1,5 @@
 defprotocol Clik.Renderable do
+  @type t :: term()
   @moduledoc """
   Renders `term` and writes the resulting string to `out`.
   """

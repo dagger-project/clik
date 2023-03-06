@@ -35,7 +35,7 @@ defmodule Clik.Output.HelpFormatter do
 
     options =
       Enum.map(config.global_options, fn {_key, option} -> format_option(option) end)
-      |> Enum.join(" ")
+      |> Enum.join("")
 
     doc = Document.line(doc, options)
 
@@ -48,7 +48,7 @@ defmodule Clik.Output.HelpFormatter do
       end
 
     flags =
-      Enum.reduce(config.global_options, %Table{}, fn {_, option}, flags ->
+      Enum.reduce(config.global_options, Table.empty(), fn {_, option}, flags ->
         Table.add_row(flags, [format_option(option, true), format_option_help(option)])
       end)
 
@@ -87,7 +87,7 @@ defmodule Clik.Output.HelpFormatter do
     doc = Document.line(doc, " #{global_options} #{cmd_options}")
 
     global_flags =
-      Enum.reduce(config.global_options, %Table{}, fn {_, option}, flags ->
+      Enum.reduce(config.global_options, Table.empty(), fn {_, option}, flags ->
         Table.add_row(flags, [format_option(option, true), format_option_help(option)])
       end)
 
@@ -102,7 +102,7 @@ defmodule Clik.Output.HelpFormatter do
       end
 
     cmd_flags =
-      Enum.reduce(Command.options(cmd), %Table{}, fn option, flags ->
+      Enum.reduce(Command.options(cmd), Table.empty(), fn option, flags ->
         Table.add_row(flags, [format_option(option, true), format_option_help(option)])
       end)
 
@@ -135,9 +135,9 @@ defmodule Clik.Output.HelpFormatter do
 
   defp format_option(option, false) do
     if option.short != nil do
-      "-#{option.short}"
+      " -#{option.short}"
     else
-      "--#{format_long_name(option.long)}"
+      " --#{format_long_name(option.long)}"
     end
   end
 
@@ -145,19 +145,35 @@ defmodule Clik.Output.HelpFormatter do
     short_option =
       if option.short != nil do
         "-#{option.short}"
-      else
-        ""
       end
 
-    text = short_option <> ",--#{format_long_name(option.long)}"
+    long_option =
+      if option.long != nil do
+        "--#{format_long_name(option.long)}"
+      end
 
-    case option_placeholder(option) do
-      nil ->
-        text
+    text =
+      cond do
+        short_option != nil and long_option != nil ->
+          " #{short_option},#{long_option}"
 
-      placeholder ->
-        text <> " " <> placeholder
-    end
+        short_option != nil ->
+          " #{short_option}"
+
+        long_option != nil ->
+          " #{long_option}"
+      end
+
+    updated =
+      case option_placeholder(option) do
+        nil ->
+          text
+
+        placeholder ->
+          text <> " " <> placeholder
+      end
+
+    String.trim_leading(updated)
   end
 
   defp format_long_name(name) do

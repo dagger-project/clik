@@ -1,6 +1,7 @@
 defmodule Clik.Command do
   alias Clik.{Argument, CommandEnvironment, Option}
 
+  @enforce_keys [:name, :cb_mod]
   defstruct [:name, :cb_mod]
 
   @typedoc "An executable command"

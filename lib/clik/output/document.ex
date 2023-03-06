@@ -3,12 +3,13 @@ defmodule Clik.Output.Document do
   Formatted terminal output.
   """
   alias IO.ANSI
+  alias Clik.Renderable
   alias Clik.Output.{Table, Text}
 
   @enforce_keys [:entries]
   defstruct entries: []
 
-  @type doc_entries :: [] | [Text.t()]
+  @type doc_entries :: [] | [Renderable.t()]
   @type t :: %__MODULE__{
           entries: doc_entries()
         }

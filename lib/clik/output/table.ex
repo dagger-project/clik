@@ -1,5 +1,9 @@
 defmodule Clik.Output.Table do
-  defstruct columns: 2, headers: [], rows: [], max_widths: %{}
+  defstruct columns: nil, headers: nil, rows: [], max_widths: %{}
+
+  def empty(columns \\ 2, headers \\ []) do
+    %__MODULE__{columns: columns, headers: headers}
+  end
 
   def add_row(table, columns) do
     if length(columns) > table.columns do
@@ -29,7 +33,7 @@ defmodule Clik.Output.Table do
     end
   end
 
-  defp update_widths([], columns) do
+  defp update_widths(widths, columns) when map_size(widths) == 0 do
     Enum.with_index(columns)
     |> Enum.reduce(%{}, fn {col, index}, acc -> Map.put(acc, index, String.length(col)) end)
   end
@@ -126,7 +130,11 @@ defimpl Clik.Renderable, for: Clik.Output.Table do
 
   defp maybe_truncate_col(col, col_width) do
     if String.length(col) > col_width do
-      String.slice(col, 0..(col_width - 4)) <> @ellipses
+      if col_width <= 4 do
+        @ellipses
+      else
+        String.slice(col, 0..(col_width - 4)) <> @ellipses
+      end
     else
       col
     end
@@ -142,11 +150,8 @@ defimpl Clik.Renderable, for: Clik.Output.Table do
 
   defp position_text(:center, text, width) do
     text_width = String.length(text)
-    # IO.puts("Centering #{text} (#{text_width}) in #{width} column")
     precise_padding = (width - text_width) / 2
     base_padding = trunc(precise_padding)
-    # IO.puts("Precise padding: #{precise_padding}")
-    # IO.puts("Base padding: #{base_padding}")
 
     {leading, trailing} =
       if precise_padding - base_padding > 0 do
@@ -155,8 +160,6 @@ defimpl Clik.Renderable, for: Clik.Output.Table do
         {base_padding, base_padding}
       end
 
-    padded = String.duplicate(" ", leading) <> text <> String.duplicate(" ", trailing)
-    # IO.puts("Formatted header length: #{String.length(padded)}")
-    padded
+    String.duplicate(" ", leading) <> text <> String.duplicate(" ", trailing)
   end
 end

@@ -4,7 +4,13 @@ defmodule Clik.Platform do
   @default_term_width 120
 
   def script_name() do
-    Path.basename(:escript.script_name())
+    case Path.basename(:escript.script_name()) do
+      "--no-halt" ->
+        "mix"
+
+      name ->
+        name
+    end
   end
 
   def eol_char() do

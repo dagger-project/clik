@@ -75,7 +75,9 @@ defmodule Clik.CommandBehaviourTest do
   test "bad args are caught" do
     assert {:error, :badarg} == Command.new(:hello_world, nil)
     assert {:error, :badarg} == Command.new(nil, Clik.Test.HelloWorldCommand)
+    assert {:error, :badarg} == Command.new(:hello, Clik.Test.ThisModuleDoesNotExist)
     assert_raise ArgumentError, fn -> Command.new!(:hello_world, nil) end
     assert_raise ArgumentError, fn -> Command.new!(nil, Clik.Test.HelloWorldCommand) end
+    assert_raise ArgumentError, fn -> Command.new!(:hello, Clik.Test.ThisModuleDoesNotExist) end
   end
 end
