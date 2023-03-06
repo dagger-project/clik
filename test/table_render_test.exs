@@ -43,6 +43,7 @@ defmodule Clik.TableRenderTest do
 
   test "2 column table with headers, narrow terminal" do
     Application.put_env(:clik, :tty_utility, Path.absname("test/support/scripts/small_term.sh"))
+    on_exit(fn -> Application.delete_env(:clik, :tty_utility) end)
     assert 40 == Platform.terminal_width()
     long_row = for _ <- 1..10, do: "100000"
     short_row = for _ <- 1..10, do: "10"
@@ -60,6 +61,7 @@ defmodule Clik.TableRenderTest do
 
   test "2 column table with headers, medium terminal" do
     Application.put_env(:clik, :tty_utility, Path.absname("test/support/scripts/medium_term.sh"))
+    on_exit(fn -> Application.delete_env(:clik, :tty_utility) end)
     assert 80 == Platform.terminal_width()
     long_row = for _ <- 1..10, do: "10000000"
     short_row = for _ <- 1..10, do: "10"
