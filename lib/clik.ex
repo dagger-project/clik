@@ -187,7 +187,7 @@ defmodule Clik do
   end
 
   defp show_command_help(config, env, cmd_name) do
-    doc = HelpFormatter.command_help(config, cmd_name)
+    doc = HelpFormatter.command_help!(config, cmd_name)
     Clik.Renderable.render(doc, env.output)
   end
 end

@@ -1,7 +1,7 @@
-USAGE: mix <cmd>  -h
-Commands: bar
 
+USAGE: mix --foo -h
 
-Global options
---------------
--h,--help      display this help text      
+Options
+-------
+-h,--help        display this help text      
+--foo <str>                                  

@@ -96,20 +96,8 @@ defmodule Clik.ConfigurationTest do
                Configuration.new()
                |> Configuration.add_command(cmd)
 
-      refute Configuration.has_default?(config)
       assert {:error, :duplicate_command} == Configuration.add_command(config, cmd)
       assert_raise DuplicateCommandError, fn -> Configuration.add_command!(config, cmd) end
-    end
-
-    test "add default command" do
-      cmd = Command.new!(:default, Clik.Test.HelloWorldCommand)
-
-      assert {:ok, config} =
-               Configuration.new()
-               |> Configuration.add_command(Command.new!(:hello, Clik.Test.HelloWorldCommand))
-
-      assert {:ok, config} = Configuration.add_command(config, cmd)
-      assert Configuration.has_default?(config)
     end
   end
 

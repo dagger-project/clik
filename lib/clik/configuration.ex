@@ -2,14 +2,15 @@ defmodule Clik.Configuration do
   @moduledoc """
   Collects commands and global options.
   """
-  defstruct global_options: %{}, commands: %{}, script_help: nil
+  defstruct global_options: %{}, commands: %{}, script_help: nil, has_default: false
   alias Clik.{Command, Option}
   alias Clik.{DuplicateCommandError, DuplicateOptionError, UnknownCommandError}
 
   @typedoc "Global CLI app configuration"
   @type t :: %__MODULE__{
           global_options: %{atom() => Option.t()},
-          commands: %{atom() => Command.t()}
+          commands: %{atom() => Command.t()},
+          has_default: boolean()
         }
 
   @doc "Creates a new `Clik.Configuration` instance"
@@ -125,13 +126,6 @@ defmodule Clik.Configuration do
         raise UnknownCommandError, name
     end
   end
-
-  @doc """
-  Does the configuration have a default command?
-  """
-  @doc since: "0.1.0"
-  @spec has_default?(t()) :: boolean()
-  def has_default?(config), do: Map.has_key?(config.commands, :default)
 
   @doc """
   Does the configuration contain a named command?

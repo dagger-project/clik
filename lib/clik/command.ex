@@ -1,13 +1,14 @@
 defmodule Clik.Command do
   alias Clik.{Argument, CommandEnvironment, Option}
 
-  @enforce_keys [:name, :cb_mod]
-  defstruct [:name, :cb_mod]
+  @enforce_keys [:name, :cb_mod, :default?]
+  defstruct [:name, :cb_mod, :default?]
 
   @typedoc "An executable command"
   @type t :: %__MODULE__{
           name: atom(),
-          cb_mod: module()
+          cb_mod: module(),
+          default?: boolean()
         }
 
   @typedoc "List of command options"
@@ -53,15 +54,17 @@ defmodule Clik.Command do
   * Loading `callback_module` via `Code.ensure_loaded/1` fails
   """
   @doc since: "0.1.0"
-  @spec new(atom(), module()) :: {:ok, t()} | {:error, :badarg}
-  def new(name, callback_module) when name == nil or callback_module == nil do
+  @spec new(atom(), module(), boolean()) :: {:ok, t()} | {:error, :badarg}
+  def new(name, callback_module, default \\ false)
+
+  def new(name, callback_module, _default) when name == nil or callback_module == nil do
     {:error, :badarg}
   end
 
-  def new(name, callback_module) do
+  def new(name, callback_module, default) do
     case Code.ensure_loaded(callback_module) do
       {:module, ^callback_module} ->
-        {:ok, %__MODULE__{name: name, cb_mod: callback_module}}
+        {:ok, %__MODULE__{name: name, cb_mod: callback_module, default?: default}}
 
       {:error, _} ->
         {:error, :badarg}
@@ -77,9 +80,9 @@ defmodule Clik.Command do
   * Loading `callback_module` via `Code.ensure_loaded/1` fails
   """
   @doc since: "0.1.0"
-  @spec new!(atom(), module()) :: t() | no_return()
-  def new!(name, callback_module) do
-    case new(name, callback_module) do
+  @spec new!(atom(), module(), boolean()) :: t() | no_return()
+  def new!(name, callback_module, default \\ false) do
+    case new(name, callback_module, default) do
       {:ok, command} ->
         command
 

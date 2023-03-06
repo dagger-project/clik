@@ -22,18 +22,21 @@ defmodule Clik.Output.Document do
   def empty(), do: %__MODULE__{entries: []}
 
   @doc "Adds a block of text to a document"
+  @doc since: "0.1.0"
   @spec text(t(), code(), String.t()) :: t()
   def text(doc, code \\ nil, text) do
     %{doc | entries: [Text.new(code, text, false) | doc.entries]}
   end
 
   @doc "Add a line to a document"
+  @doc since: "0.1.0"
   @spec line(t(), code(), String.t()) :: t()
   def line(doc, code \\ nil, text) do
     %{doc | entries: [Text.new(code, text, true) | doc.entries]}
   end
 
   @doc "Adds a section header to a document"
+  @doc since: "0.1.0"
   @spec section_head(t(), code(), String.t()) :: t()
   def section_head(doc, code \\ nil, text) do
     title = Text.new(code, text, true)
@@ -42,6 +45,7 @@ defmodule Clik.Output.Document do
   end
 
   @doc "Add table to document"
+  @doc since: "0.1.0"
   @spec table(t(), Table.t()) :: t()
   def table(doc, table) do
     %{doc | entries: [table | doc.entries]}
