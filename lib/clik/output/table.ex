@@ -1,12 +1,13 @@
 defmodule Clik.Output.Table do
   defstruct columns: nil, headers: nil, rows: [], max_widths: %{}
 
+  @type colnum :: non_neg_integer()
   @type format_hint :: :left | :right | :center
   @type t :: %__MODULE__{
           columns: non_neg_integer(),
           headers: [] | [String.t()] | [{format_hint(), String.t()}],
           rows: [] | [[String.t()]],
-          max_widths: %{key: non_neg_integer(), value: non_neg_integer()}
+          max_widths: %{colnum() => non_neg_integer()}
         }
 
   def empty(columns \\ 2, headers \\ []) do
