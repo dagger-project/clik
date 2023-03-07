@@ -143,14 +143,25 @@ defmodule Clik.Configuration do
   """
   @doc since: "0.1.0"
   @spec options(t(), atom()) :: {:ok, %{atom() => Option.t()}} | {:error, :unknown_command}
-  def options(config, name) do
-    if Map.has_key?(config.commands, name) do
-      command = Map.get(config.commands, name)
+  def options(config, command_name \\ nil) do
+    result =
+      if Enum.count(config.commands) == 1 and command_name == nil do
+        [c] = Map.values(config.commands)
+        {:ok, c}
+      else
+        if Map.has_key?(config.commands, command_name) do
+          {:ok, Map.get(config.commands, command_name)}
+        else
+          {:error, :unknown_command}
+        end
+      end
 
-      {:ok,
-       Enum.map(Command.options(command), &{&1.name, &1}) |> Enum.into(config.global_options)}
-    else
-      {:error, :unknown_command}
+    case result do
+      {:ok, command} ->
+        {:ok, Map.merge(Command.options(command), config.global_options)}
+
+      error ->
+        error
     end
   end
 
@@ -163,7 +174,7 @@ defmodule Clik.Configuration do
   """
   @doc since: "0.1.0"
   @spec options!(t(), atom()) :: %{atom() => Option.t()} | no_return()
-  def options!(config, command_name) do
+  def options!(config, command_name \\ nil) do
     case options(config, command_name) do
       {:ok, options} ->
         options
@@ -178,16 +189,16 @@ defmodule Clik.Configuration do
   def prepare(config, command_name \\ nil)
 
   def prepare(config, nil) do
-    {switches, aliases} = prepare_options(config.global_options)
-
-    updated =
-      if not Keyword.has_key?(switches, :help) do
-        [{:help, :boolean} | switches]
+    options =
+      if Enum.count(config.commands) == 1 do
+        [command] = Map.values(config.commands)
+        Map.merge(config.global_options, Command.options(command))
       else
-        switches
+        config.global_options
       end
 
-    {:ok, [strict: updated, aliases: aliases]}
+    {switches, aliases} = prepare_options(options)
+    {:ok, [strict: switches, aliases: aliases]}
   end
 
   def prepare(config, command_name) do
@@ -203,7 +214,7 @@ defmodule Clik.Configuration do
   end
 
   defp check_duplicate_options(%__MODULE__{global_options: globals}, command) do
-    Enum.reduce_while(Command.options(command), :ok, fn option, _ ->
+    Enum.reduce_while(Command.options(command), :ok, fn {_, option}, _ ->
       if Map.has_key?(globals, option.name) do
         {:halt, {:error, option}}
       else

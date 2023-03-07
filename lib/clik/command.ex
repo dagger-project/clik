@@ -12,7 +12,7 @@ defmodule Clik.Command do
         }
 
   @typedoc "List of command options"
-  @type options :: [] | [Option.t()]
+  @type option_map :: %{} | %{atom() => Option.t()}
 
   @type result :: :ok | {:error, atom()}
 
@@ -20,7 +20,7 @@ defmodule Clik.Command do
   @callback help_text() :: String.t() | nil
 
   @doc "Returns list of command-specific options"
-  @callback options() :: options()
+  @callback options() :: option_map()
 
   @doc "Executes the command"
   @callback run(CommandEnvironment.t()) :: result()
@@ -95,7 +95,7 @@ defmodule Clik.Command do
   Fetch list of command-specific options.
   """
   @doc since: "0.1.0"
-  @spec options(t()) :: options()
+  @spec options(t()) :: option_map()
   def options(cmd), do: cmd.cb_mod.options()
 
   @doc """

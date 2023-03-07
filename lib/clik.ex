@@ -11,6 +11,7 @@ defmodule Clik do
           {:missing_option, atom()}
           | {:unknown_command, atom()}
           | {:unknown_options, [String.t()]}
+          | {:error, :missing_command}
           | {:error, atom()}
 
   @typedoc "Execution result"
@@ -42,31 +43,59 @@ defmodule Clik do
   @doc since: "0.1.0"
   @spec run(Configuration.t(), argv(), CommandEnvironment.t()) :: result()
   def run(config, args, env) do
-    {:ok, global_opts} = Configuration.prepare(config)
+    if Enum.count(config.commands) == 1 do
+      dispatch_to_default(config, env, args)
+    else
+      resolve_and_dispatch(config, env, args)
+    end
+  end
 
-    case OptionParser.parse(args, global_opts) do
-      {parsed, [], []} ->
-        if Keyword.get(parsed, :help, false) do
-          show_script_help(config, env)
-        else
-          dispatch_to(config, env, args, :default)
+  defp dispatch_to_default(config, env, args) do
+    {:ok, options} = Configuration.prepare(config)
+
+    case OptionParser.parse(args, options) do
+      {parsed, remaining, []} ->
+        case check_parsed_options(Configuration.options!(config), parsed) do
+          {:ok, updated_options} ->
+            [cmd] = Map.values(config.commands)
+            run_command(cmd, config, %{env | options: updated_options, arguments: remaining})
+
+          error ->
+            error
         end
 
-      {parsed, [cmd_name | _], _} ->
-        case resolve_command_name(config, cmd_name) do
-          {:ok, resolved} ->
-            {final_args, final_cmd} =
-              if resolved != :default do
-                {args -- [cmd_name], resolved}
-              else
-                {args, resolved}
-              end
+      {_, _, errors} ->
+        option_names = for {option, _} <- errors, do: option
+        {:unknown_options, option_names}
+    end
+  end
 
-            if Keyword.get(parsed, :help, false) do
-              show_command_help(config, env, resolved)
-            else
-              dispatch_to(config, env, final_args, final_cmd)
-            end
+  defp resolve_and_dispatch(config, env, args) do
+    case OptionParser.parse(args, switches: [help: :boolean], aliases: [h: :help]) do
+      {parsed, [], _} ->
+        if Keyword.has_key?(parsed, :help) do
+          show_script_help(config, env)
+        else
+          {:error, :missing_command}
+        end
+
+      {_, [command_name | _], _} ->
+        with {:ok, resolved} <- resolve_command_name(config, command_name) do
+          updated = args -- [command_name]
+          dispatch_to_command(resolved, config, env, updated)
+        end
+    end
+  end
+
+  defp dispatch_to_command(command_name, config, env, args) do
+    {:ok, options} = Configuration.prepare(config, command_name)
+
+    case OptionParser.parse(args, options) do
+      {parsed, remaining, []} ->
+        case check_parsed_options(Configuration.options!(config, command_name), parsed) do
+          {:ok, updated_options} ->
+            cmd = Configuration.command!(config, command_name)
+            run_command(cmd, config, %{env | options: updated_options, arguments: remaining})
 
           error ->
             error
@@ -81,19 +110,12 @@ defmodule Clik do
   defp resolve_command_name(config, name) do
     case convert_command_name(name) do
       nil ->
-        if Configuration.has_command?(config, :default) do
-          {:ok, :default}
-        else
-          {:unknown_command, name}
-        end
+        {:unknown_command, name}
 
       converted ->
         cond do
           Configuration.has_command?(config, converted) ->
             {:ok, converted}
-
-          Configuration.has_command?(config, :default) ->
-            {:ok, :default}
 
           true ->
             {:unknown_command, name}
@@ -110,38 +132,9 @@ defmodule Clik do
     end
   end
 
-  defp dispatch_to(config, env, args, cmd_name) do
-    case Configuration.prepare(config, cmd_name) do
-      {:ok, options} ->
-        case OptionParser.parse(args, options) do
-          {parsed, remaining, []} ->
-            case check_parsed_options(config, cmd_name, parsed) do
-              {:ok, updated_options} ->
-                cmd = Configuration.command!(config, cmd_name)
-                run_command(cmd, %{env | options: updated_options, arguments: remaining})
-
-              error ->
-                error
-            end
-
-          {_, _, errors} ->
-            option_names = for {option, _} <- errors, do: option
-            {:unknown_options, option_names}
-        end
-
-      {:error, :unknown_command} ->
-        if cmd_name == :default do
-          :no_default
-        else
-          {:unknown_command, cmd_name}
-        end
-    end
-  end
-
-  defp check_parsed_options(config, cmd_name, parsed) do
+  defp check_parsed_options(options, parsed) do
     {required, defaults} =
-      Configuration.options!(config, cmd_name)
-      |> Map.values()
+      Map.values(options)
       |> Enum.filter(&(&1.required == true or &1.default != nil))
       |> Enum.split_with(&(&1.required == true))
 
@@ -177,8 +170,12 @@ defmodule Clik do
     {:ok, updated}
   end
 
-  defp run_command(cmd, env) do
-    Command.run(cmd, env)
+  defp run_command(cmd, config, env) do
+    if Keyword.has_key?(env.options, :help) do
+      show_command_help(config, env, cmd.name)
+    else
+      Command.run(cmd, env)
+    end
   end
 
   defp show_script_help(config, env) do

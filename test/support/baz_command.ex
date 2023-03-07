@@ -2,10 +2,10 @@ defmodule Clik.Test.BazCommand do
   use Clik.Command
 
   def options() do
-    [
-      Option.new!(:foo, required: true),
-      Option.new!(:baz, type: :integer, default: 100)
-    ]
+    %{
+      foo: Option.new!(:foo, required: true),
+      baz: Option.new!(:baz, type: :integer, default: 100)
+    }
   end
 
   def run(env) do

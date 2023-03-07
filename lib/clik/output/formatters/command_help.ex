@@ -23,7 +23,7 @@ defmodule Clik.Output.Formatters.CommandHelp do
       |> Enum.join(" ")
 
     command_options =
-      Enum.map(Command.options(command), fn option -> Options.format_name(option) end)
+      Enum.map(Command.options(command), fn {_, option} -> Options.format_name(option) end)
       |> Enum.join(" ")
 
     doc = Document.line(doc, " #{global_options} #{command_options}")
@@ -43,7 +43,7 @@ defmodule Clik.Output.Formatters.CommandHelp do
       end
 
     command_flags =
-      Enum.reduce(Command.options(command), Table.empty(), fn option, flags ->
+      Enum.reduce(Command.options(command), Table.empty(), fn {_, option}, flags ->
         Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
       end)
 

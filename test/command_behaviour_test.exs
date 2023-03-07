@@ -8,8 +8,7 @@ defmodule Clik.CommandBehaviourTest do
 
   test "basic getters" do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
-    options = Command.options(cmd)
-    assert 1 == length(options)
+    assert 1 == Enum.count(Command.options(cmd))
     assert "Says hello to the world" == Command.help_text(cmd)
   end
 
@@ -22,23 +21,30 @@ defmodule Clik.CommandBehaviourTest do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
     config = Configuration.add_command!(%Configuration{}, cmd)
     assert :ok == Clik.run(config, ["hello_world"], @test_env)
-    assert :no_default == Clik.run(config, [], @test_env)
+    assert :ok == Clik.run(config, [], @test_env)
   end
 
   test "execute a command w/high-level interface and bad command name" do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
     config = Configuration.add_command!(%Configuration{}, cmd)
-    assert {:unknown_command, "hello"} == Clik.run(config, ["hello"], @test_env)
-    assert :no_default == Clik.run(config, [], @test_env)
+    assert :ok == Clik.run(config, ["hello"], @test_env)
+    assert :ok == Clik.run(config, [], @test_env)
+  end
+
+  test "execute a named command w/high-level interface" do
+    config =
+      Configuration.add_command!(
+        %Configuration{},
+        Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
+      )
+      |> Configuration.add_command!(Command.new!(:baz, Clik.Test.BazCommand))
+
+    assert :ok == Clik.run(config, ["hello_world"], @test_env)
   end
 
   test "execute a command w/high-level interface and default command" do
     cmd = Command.new!(:hello_world, Clik.Test.HelloWorldCommand)
-    default = Command.new!(:default, Clik.Test.HelloWorldCommand)
-
-    config =
-      Configuration.add_command!(%Configuration{}, cmd) |> Configuration.add_command!(default)
-
+    config = Configuration.add_command!(%Configuration{}, cmd)
     assert :ok == Clik.run(config, ["hello_world"], @test_env)
     assert :ok == Clik.run(config, [], @test_env)
   end

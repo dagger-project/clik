@@ -31,7 +31,7 @@ defmodule Clik.Output.Formatters.SingleCommandHelp do
       Enum.map(config.global_options, fn {_key, option} -> Options.format_name(option) end)
 
     options =
-      Enum.reduce(Command.options(command), options, fn option, acc ->
+      Enum.reduce(Command.options(command), options, fn {_, option}, acc ->
         [Options.format_name(option) | acc]
       end)
       |> Enum.join("")
@@ -44,7 +44,7 @@ defmodule Clik.Output.Formatters.SingleCommandHelp do
       end)
 
     flags =
-      Enum.reduce(Command.options(command), flags, fn option, flags ->
+      Enum.reduce(Command.options(command), flags, fn {_, option}, flags ->
         Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
       end)
 

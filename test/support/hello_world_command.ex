@@ -2,7 +2,7 @@ defmodule Clik.Test.HelloWorldCommand do
   use Clik.Command, stubs: false
 
   def options() do
-    [Option.new!(:verbose, type: :count)]
+    %{verbose: Option.new!(:verbose, type: :count)}
   end
 
   def arguments(), do: []

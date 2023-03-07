@@ -1,4 +1,5 @@
 defmodule Clik.CommandEnvironment do
+  alias Clik.Platform
   alias Clik.Option
   @enforce_keys [:script, :input, :output, :error]
   defstruct script: nil, options: nil, arguments: nil, input: nil, output: nil, error: nil
@@ -31,7 +32,7 @@ defmodule Clik.CommandEnvironment do
   """
   @doc since: "0.1.0"
   @spec new(String.t(), opts()) :: t()
-  def new(script_name, opts \\ []) do
+  def new(script_name \\ Platform.script_name(), opts \\ []) do
     %__MODULE__{
       script: script_name,
       options: Keyword.get(opts, :options, @default_opts_args),
