@@ -15,7 +15,6 @@ defmodule Clik.MixProject do
       test_coverage: test_coverage(),
       aliases: aliases(),
       preferred_cli_env: [cover: :test],
-      escript: [main_module: Clik.Example.Main],
       dialyzer: dialyzer()
     ]
   end
