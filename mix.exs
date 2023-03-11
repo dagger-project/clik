@@ -4,6 +4,8 @@ defmodule Clik.MixProject do
   def project do
     [
       app: :clik,
+      name: "Clik",
+      source_url: "https://github.com/kevsmith/clik",
       description: "CLI app library",
       package: package(),
       version: "0.2.1",
@@ -15,7 +17,8 @@ defmodule Clik.MixProject do
       test_coverage: test_coverage(),
       aliases: aliases(),
       preferred_cli_env: [cover: :test],
-      dialyzer: dialyzer()
+      dialyzer: dialyzer(),
+      docs: docs()
     ]
   end
 
@@ -78,7 +81,15 @@ defmodule Clik.MixProject do
 
   defp package() do
     [
-      licenses: ["Apache-2.0"]
+      licenses: ["Apache-2.0"],
+      links: %{
+        "Source" => "https://github.com/kevsmith/clik",
+        "Announcements" => "https://blog.smith-manor.us/tags/clik"
+      }
     ]
+  end
+
+  defp docs() do
+    [main: "Clik", extras: ["README.md"]]
   end
 end
