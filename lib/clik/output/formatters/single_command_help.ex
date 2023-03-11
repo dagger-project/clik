@@ -28,11 +28,21 @@ defmodule Clik.Output.Formatters.SingleCommandHelp do
     doc = Document.text(doc, "USAGE: #{Platform.script_name()}")
 
     options =
-      Enum.map(config.global_options, fn {_key, option} -> Options.format_name(option) end)
+      Enum.reduce(config.global_options, [], fn {_key, option}, acc ->
+        if !option.hidden do
+          [Options.format_name(option) | acc]
+        else
+          acc
+        end
+      end)
 
     options =
       Enum.reduce(Command.options(command), options, fn {_, option}, acc ->
-        [Options.format_name(option) | acc]
+        if !option.hidden do
+          [Options.format_name(option) | acc]
+        else
+          acc
+        end
       end)
       |> Enum.join("")
 
@@ -40,12 +50,20 @@ defmodule Clik.Output.Formatters.SingleCommandHelp do
 
     flags =
       Enum.reduce(config.global_options, Table.empty(), fn {_, option}, flags ->
-        Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
+        if !option.hidden do
+          Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
+        else
+          flags
+        end
       end)
 
     flags =
       Enum.reduce(Command.options(command), flags, fn {_, option}, flags ->
-        Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
+        if !option.hidden do
+          Table.add_row(flags, [Options.format_name(option, true), Options.format_help(option)])
+        else
+          flags
+        end
       end)
 
     Document.line(doc, "")

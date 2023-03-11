@@ -1,5 +1,5 @@
 
-USAGE: mix --foo -d -h
+USAGE: mix --foo -h -d
 
 Options
 -------

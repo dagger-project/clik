@@ -56,6 +56,7 @@ defmodule Clik.ScriptHelpTest do
       |> Configuration.add_global_option!(
         Option.new!(:dry_run, type: :boolean, help: "Do not update", short: :d)
       )
+      |> Configuration.add_global_option!(Option.new!(:secret, type: :string, hidden: true))
       |> Configuration.add_command!(Command.new!(:bar, Clik.Test.BarCommand))
 
     doc = HelpFormatter.script_help(config)

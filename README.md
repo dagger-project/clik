@@ -71,8 +71,8 @@ Percentage | Module
     80.00% | Clik.Command
     80.00% | Clik.Renderable.Clik.Output.Document
     84.85% | Clik.Output.Formatters.Options
+    85.19% | Clik.Output.Formatters.SingleCommandHelp
     85.71% | Clik.Output.Formatters.CommandHelp
-    90.00% | Clik.Output.Formatters.SingleCommandHelp
     90.91% | Clik.Output.Document
     90.91% | Clik.Output.Text
     93.75% | Clik.Option
@@ -90,5 +90,5 @@ Percentage | Module
    100.00% | Clik.UnknownCommandNameError
    100.00% | String.Chars.Clik.Output.Text
 -----------|--------------------------
-    89.28% | Total
+    88.95% | Total
 ```
