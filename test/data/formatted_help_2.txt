@@ -1,0 +1,8 @@
+Hello there!
+
+USAGE: mix --dry-run -h
+
+Global options
+--------------
+--dry-run      Do not update               
+-h,--help      display this help text      

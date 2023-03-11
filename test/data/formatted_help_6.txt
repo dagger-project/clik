@@ -1,0 +1,7 @@
+
+USAGE: mix --foo -h
+
+Options
+-------
+-h,--help        display this help text      
+--foo <str>                                  

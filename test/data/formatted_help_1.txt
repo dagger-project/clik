@@ -1,0 +1,7 @@
+Hello there!
+
+USAGE: mix -h
+
+Global options
+--------------
+-h,--help      display this help text      

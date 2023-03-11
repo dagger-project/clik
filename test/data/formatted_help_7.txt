@@ -1,0 +1,10 @@
+Hello there!
+
+USAGE: mix <cmd>  --dry-run -h
+Commands: bar,hello
+
+
+Global options
+--------------
+--dry-run                                  
+-h,--help      display this help text      

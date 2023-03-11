@@ -1,0 +1,8 @@
+
+USAGE: mix --foo -d -h
+
+Options
+-------
+-d,--dry-run      Do not update               
+-h,--help         display this help text      
+--foo <str>                                   
