@@ -1,4 +1,7 @@
 defmodule Clik.DuplicateOptionError do
+  @doc """
+  Indicates an option, either global or command, has been duplicated.
+  """
   defexception [:message]
 
   alias Clik.Option
@@ -18,7 +21,10 @@ defmodule Clik.DuplicateOptionError do
   end
 end
 
-defmodule Clik.DuplicateCommandError do
+defmodule Clik.DuplicateCommandNameError do
+  @doc """
+  Indicates a command with the same name already exists.
+  """
   defexception [:message]
 
   @impl true
@@ -27,7 +33,10 @@ defmodule Clik.DuplicateCommandError do
   end
 end
 
-defmodule Clik.UnknownCommandError do
+defmodule Clik.UnknownCommandNameError do
+  @doc """
+  Indicates an attempt was made to use a unknown command
+  """
   defexception [:message]
 
   @impl true

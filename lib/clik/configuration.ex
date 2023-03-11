@@ -4,7 +4,7 @@ defmodule Clik.Configuration do
   """
   defstruct global_options: %{}, commands: %{}, script_help: nil, has_default: false
   alias Clik.{Command, Option}
-  alias Clik.{DuplicateCommandError, DuplicateOptionError, UnknownCommandError}
+  alias Clik.{DuplicateCommandNameError, DuplicateOptionError, UnknownCommandNameError}
 
   @typedoc "Global CLI app configuration"
   @type t :: %__MODULE__{
@@ -78,14 +78,14 @@ defmodule Clik.Configuration do
   @doc """
   Add a command to the application configuration.
 
-  Raises `Clik.DuplicateCommandError` or `Clik.DuplicateOptionError` on error.
+  Raises `Clik.DuplicateCommandNameError` or `Clik.DuplicateOptionError` on error.
   """
   @doc since: "0.1.0"
   @spec add_command!(t(), Command.t()) :: t() | no_return()
   def add_command!(config, command) do
     case add_command(config, command) do
       {:error, :duplicate_command} ->
-        raise DuplicateCommandError, command
+        raise DuplicateCommandNameError, command
 
       {:error, :duplicate_option, option} ->
         raise DuplicateOptionError, option
@@ -113,7 +113,7 @@ defmodule Clik.Configuration do
   @doc """
   Look up `Clik.Command` by name.
 
-  Raises `Clik.UnknownCommandError` if `name` is not found.
+  Raises `Clik.UnknownCommandNameError` if `name` is not found.
   """
   @doc since: "0.1.0"
   @spec command!(t(), atom()) :: Command.t() | no_return()
@@ -123,7 +123,7 @@ defmodule Clik.Configuration do
         cmd
 
       {:error, :unknown_command} ->
-        raise UnknownCommandError, name
+        raise UnknownCommandNameError, name
     end
   end
 
@@ -170,7 +170,7 @@ defmodule Clik.Configuration do
 
   See `Clik.Configuration.options/2` for more information.
 
-  Raises `Clik.UnknownCommandError` when command not found.
+  Raises `Clik.UnknownCommandNameError` when command not found.
   """
   @doc since: "0.1.0"
   @spec options!(t(), atom()) :: %{atom() => Option.t()} | no_return()
@@ -180,7 +180,7 @@ defmodule Clik.Configuration do
         options
 
       {:error, :unknown_command} ->
-        raise UnknownCommandError, command_name
+        raise UnknownCommandNameError, command_name
     end
   end
 

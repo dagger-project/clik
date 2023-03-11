@@ -1,7 +1,7 @@
 defmodule Clik.ConfigurationTest do
   use ExUnit.Case, async: true
-  alias Clik.DuplicateCommandError
-  alias Clik.{DuplicateCommandError, DuplicateOptionError, UnknownCommandError}
+  alias Clik.DuplicateCommandNameError
+  alias Clik.{DuplicateCommandNameError, DuplicateOptionError, UnknownCommandNameError}
   alias Clik.{Command, Option, Configuration}
 
   describe "registering commands" do
@@ -86,7 +86,7 @@ defmodule Clik.ConfigurationTest do
                |> Configuration.add_command(Command.new!(:hello, Clik.Test.HelloWorldCommand))
 
       assert {:error, :unknown_command} == Configuration.command(config, :goodbye)
-      assert_raise UnknownCommandError, fn -> Configuration.command!(config, :goodbye) end
+      assert_raise UnknownCommandNameError, fn -> Configuration.command!(config, :goodbye) end
     end
 
     test "add redundant command" do
@@ -97,7 +97,7 @@ defmodule Clik.ConfigurationTest do
                |> Configuration.add_command(cmd)
 
       assert {:error, :duplicate_command} == Configuration.add_command(config, cmd)
-      assert_raise DuplicateCommandError, fn -> Configuration.add_command!(config, cmd) end
+      assert_raise DuplicateCommandNameError, fn -> Configuration.add_command!(config, cmd) end
     end
   end
 
@@ -120,7 +120,7 @@ defmodule Clik.ConfigurationTest do
     test "retrieve options for unknown command" do
       assert {:error, :unknown_command} == Configuration.options(Configuration.new(), :hello)
 
-      assert_raise UnknownCommandError, fn ->
+      assert_raise UnknownCommandNameError, fn ->
         Configuration.options!(Configuration.new(), :hello)
       end
     end

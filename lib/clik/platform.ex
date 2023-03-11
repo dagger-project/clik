@@ -5,6 +5,8 @@ defmodule Clik.Platform do
 
   def script_name() do
     case Path.basename(:escript.script_name()) do
+      # Pseudo-autodetect mix runtime environment and
+      # return a sane result
       "--no-halt" ->
         "mix"
 
@@ -31,6 +33,8 @@ defmodule Clik.Platform do
         nil ->
           @default_term_width
 
+        # Expects either `tputs` or a `tputs`-compatible command to
+        # exist on `PATH`.
         tty_utility ->
           case System.cmd(tty_utility, ["cols"]) do
             {text_width, 0} ->

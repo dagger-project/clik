@@ -48,7 +48,7 @@ defmodule Clik.MixProject do
   defp elixirc_options(_), do: []
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib", "example"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp ignore_for_test() do
     [
