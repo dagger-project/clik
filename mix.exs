@@ -8,7 +8,7 @@ defmodule Clik.MixProject do
       source_url: "https://github.com/kevsmith/clik",
       description: "CLI app library",
       package: package(),
-      version: "0.2.1",
+      version: "0.2.2",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: elixirc_options(Mix.env()),
