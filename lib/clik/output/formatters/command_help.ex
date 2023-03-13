@@ -18,15 +18,19 @@ defmodule Clik.Output.Formatters.CommandHelp do
 
     doc = Document.text(doc, "USAGE: #{Platform.script_name()} #{command.name}")
 
+    filtered = Map.delete(config.global_options, :help)
+
     global_options =
-      Enum.map(config.global_options, fn {_key, option} -> Options.format_name(option) end)
+      Enum.map(filtered, fn {_key, option} -> Options.format_name(option) end)
       |> Enum.join(" ")
+      |> String.trim_leading()
 
     command_options =
       Enum.map(Command.options(command), fn {_, option} -> Options.format_name(option) end)
       |> Enum.join(" ")
+      |> String.trim_leading()
 
-    doc = Document.line(doc, " #{global_options} #{command_options}")
+    doc = Document.line(doc, "#{global_options} #{command_options}")
 
     global_flags =
       Enum.reduce(config.global_options, Table.empty(), fn {_, option}, flags ->

@@ -1,5 +1,5 @@
 Says hello to the world
-USAGE: mix default  -h  --verbose
+USAGE: mix default --verbose
 
 Global options
 --------------
