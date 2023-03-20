@@ -3,7 +3,7 @@
 Clik is a library designed to simplify writing CLI apps in Elixir. Clik handles important but tedious tasks like handling CLI options
 and generating useful help output.
 
-A complete Mix project which demonstrates how to build a CLI app with Clik is available [here](http://github.com/kevsmith/hello_clik).
+A complete Mix project which demonstrates how to build a CLI app with Clik is available [here](http://github.com/dagger-project/hello_clik).
 
 ## Brief example
 
